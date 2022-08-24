@@ -1,9 +1,76 @@
-version: '2'
+version: '3.9'
 services:
-  php:
-    image: yiisoftware/yii2-php:7.1-apache
+  app:
+    container_name: yii2-shop_nginx-fpm
+    build: .
+    ports: 
+      - "80:80"
+    depends_on: 
+      - mysql    
     volumes:
-      - ~/.composer-docker/cache:/root/.composer/cache:delegated
-      - ./:/app:delegated
+      - ".:/var/www/app"
+      - "./docker/conf/nginx:/etc/nginx/sites-available" 
+    networks:
+      - yii2-shop
+
+  mysql:
+    container_name: yii2-shop_mysql
+    restart: always
+    image: mysql:latest
+    env_file: .env
+    ports: 
+      - '3365:3306'
+    environment:
+      - MYSQL_DATABASE=$shop_db
+      - MYSQL_ROOT_PASSWORD=$shop_root_psswd
+      - MYSQL_USER=$shop_user
+      - MYSQL_PASSWORD=$shop_user_psswd
+    networks:
+      - yii2-shop
+    volumes:
+      - "db_data:/var/lib/mysql"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: yii2-shop_pma
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
     ports:
-      - '8000:80'
+      - 8888:80
+    networks:
+      - yii2-shop      
+  elasticsearch:
+    container_name: yii2-shop_elasticsearch
+    image: elasticsearch:8.3.3
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    networks:
+      - yii2-shop
+    ports:
+      - 9200:9200
+  kibana:
+    container_name: yii2-shop_kibana
+    image: kibana:8.3.3
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es-container:9200
+    networks:
+      - yii2-shop
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601      
+networks:
+  yii2-shop:
+    driver: bridge
+
+volumes:
+    db_data:
+        driver: local
