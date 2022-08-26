@@ -79,6 +79,6 @@ class m170607_105303_create_shop_elasticsearch_index extends Migration
 
     private function getClient()
     {
-       return ClientBuilder::create()->setHosts(['elasticsearch:9200'])->build();
+        return ClientBuilder::create()->setHosts(['elasticsearch:9200'])->build();
     }
 }
