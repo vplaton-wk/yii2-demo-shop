@@ -1,6 +1,6 @@
 <?php
 
-use Elasticsearch\Client;
+use Elasticsearch\ClientBuilder;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use yii\db\Migration;
 
@@ -8,15 +8,13 @@ class m170607_105303_create_shop_elasticsearch_index extends Migration
 {
     public function up()
     {
-        $client = $this->getClient();
-
         try {
-            $client->indices()->delete([
+            $this->getClient()->indices()->delete([
                 'index' => 'shop'
             ]);
         } catch (Missing404Exception $e) {}
 
-        $client->indices()->create([
+        $this->getClient()->indices()->create([
             'index' => 'shop',
             'body' => [
                 'mappings' => [
@@ -79,8 +77,8 @@ class m170607_105303_create_shop_elasticsearch_index extends Migration
         } catch (Missing404Exception $e) {}
     }
 
-    private function getClient(): Client
+    private function getClient()
     {
-        return Yii::$container->get(Client::class);
+       return ClientBuilder::create()->setHosts(['elasticsearch:9200'])->build();
     }
 }

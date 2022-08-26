@@ -1,22 +1,37 @@
 version: '3.9'
 services:
-  app:
-    container_name: yii2-shop_nginx-fpm
-    build: .
+  nginx:
+    container_name: yii2-shop_nginx
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
     ports: 
       - "80:80"
     depends_on: 
       - mysql    
     volumes:
       - "./:/var/www/html:rw"
-      - "./docker/conf/nginx:/etc/nginx/sites-available" 
     networks:
       - yii2-shop
+  php:
+    container_name: yii2-shop_php
+    ports:
+      - "9000:9000"
+    networks:
+      - yii2-shop
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    volumes:
+        - "./:/app:rw"
+    links:
+      - elasticsearch
 
   mysql:
     container_name: yii2-shop_mysql
     restart: always
     image: mysql:latest
+    command: mysqld --default-authentication-plugin=mysql_native_password
     env_file: .env
     ports: 
       - '3365:3306'
