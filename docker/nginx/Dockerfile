@@ -1,11 +1,15 @@
 
 FROM nginx:latest
 
+RUN groupadd --gid 1000 app \
+    && useradd --uid 1000 --gid app --shell /bin/bash --create-home app
+
 WORKDIR /var/www/html
 
 ADD . /var/www/html
 
-#RUN echo "127.0.0.1 backend.shop.dev"
+
+COPY hosts /etc/hosts
 
 COPY default.conf /etc/nginx/conf.d/default.conf
 

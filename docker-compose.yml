@@ -10,7 +10,6 @@ services:
       - "81:81"
       - "82:82"
       - "83:83"
-
     depends_on: 
       - mysql    
     volumes:
@@ -26,6 +25,9 @@ services:
     build:
       context: ./docker/php
       dockerfile: Dockerfile
+#      args:
+#          UID: 1000
+#          GID: 1000
     volumes:
         - "./:/var/www/html"
     links:
