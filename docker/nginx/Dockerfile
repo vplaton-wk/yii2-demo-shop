@@ -8,9 +8,6 @@ WORKDIR /var/www/html
 
 ADD . /var/www/html
 
-
-COPY hosts /etc/hosts
-
 COPY default.conf /etc/nginx/conf.d/default.conf
 
 RUN apt-get update && \

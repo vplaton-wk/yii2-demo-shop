@@ -2,6 +2,7 @@ version: '3.9'
 services:
   nginx:
     container_name: yii2-shop_nginx
+    restart: always
     build:
       context: ./docker/nginx
       dockerfile: Dockerfile
@@ -16,22 +17,21 @@ services:
       - "./:/var/www/html"
     networks:
       - yii2-shop
+
   php:
     container_name: yii2-shop_php
+    restart: always
     ports:
       - "9000:9000"
-    networks:
-      - yii2-shop
     build:
       context: ./docker/php
       dockerfile: Dockerfile
-#      args:
-#          UID: 1000
-#          GID: 1000
     volumes:
-        - "./:/var/www/html"
+      - "./:/var/www/html"
     links:
       - elasticsearch
+    networks:
+      - yii2-shop
 
   mysql:
     container_name: yii2-shop_mysql
@@ -48,12 +48,14 @@ services:
       - MYSQL_PASSWORD=$shop_user_psswd
     networks:
       - yii2-shop
+
     volumes:
       - "db_data:/var/lib/mysql"
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: yii2-shop_pma
+    restart: always
     depends_on:
       - mysql
     links:
@@ -62,39 +64,42 @@ services:
       PMA_HOST: mysql
       PMA_PORT: 3306
       PMA_ARBITRARY: 1
-    restart: always
     ports:
       - 8888:80
     networks:
       - yii2-shop      
+
   elasticsearch:
     container_name: elasticsearch
+    restart: always
     image: elasticsearch:5.2
     environment:
       - xpack.security.enabled=false
       - "discovery.type=single-node"
-    networks:
-      - yii2-shop
     ports:
       - 9200:9200
+    networks:
+      - yii2-shop
   kibana:
     container_name: yii2-shop-kibana
+    restart: always
     image: kibana:5.2
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    networks:
-      - yii2-shop
     depends_on:
       - elasticsearch
     ports:
       - 5601:5601      
-
+    networks:
+      - yii2-shop
   redis:
     image: redis:latest
     ports:
       - "6888:6379"
     networks:
       - yii2-shop
+
+
 networks:
   yii2-shop:
     driver: bridge
